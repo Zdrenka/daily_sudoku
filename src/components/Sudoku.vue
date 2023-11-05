@@ -21,23 +21,14 @@
     <!-- 9x9 board -->
     <div id="board">
       <div v-for="(row, rowIndex) in board" :key="rowIndex">
-        <div
+        <Cell
           v-for="(cell, colIndex) in row"
+          :id="`${rowIndex}-${colIndex}`"
+          :row="rowIndex"
           :key="colIndex"
-          :id="rowIndex + '-' + colIndex"
-          :class="[
-            'tile',
-            {
-              'tile-wrong': tileWrong,
-              'vertical-line': line(rowIndex),
-              'horizontal-line': line(colIndex),
-              'tile-start': cell !== '-',
-            },
-          ]"
-          @click="selectTile($event)"
-        >
-          {{ cell === "-" ? "" : cell }}
-        </div>
+          :value="cell"
+          @click="selectCell($event)"
+        />
       </div>
     </div>
     <br />
@@ -57,10 +48,14 @@
 
 <script lang="ts">
 import { Options, Vue } from "vue-class-component";
+import Cell from "@/components/Cell.vue"; // @ is an alias to /src
 
 @Options({
   props: {
     msg: String,
+  },
+  components: {
+    Cell,
   },
 })
 export default class HelloWorld extends Vue {
@@ -265,7 +260,7 @@ export default class HelloWorld extends Vue {
     this.numSelected?.classList.add("number-selected");
   }
 
-  selectTile(event: MouseEvent): void {
+  selectCell(event: MouseEvent): void {
     this.tileSelected = event.target as HTMLElement;
 
     this.tileSelected.textContent = this.numSelected?.textContent ?? null;
@@ -278,10 +273,10 @@ export default class HelloWorld extends Vue {
       this.solution[r][c] != this.numSelected?.textContent
     ) {
       this.errors += 1;
-      this.tileSelected.classList.add("tile-wrong");
+      this.tileSelected.classList.add("cell-wrong");
     } else {
       this.board[r][c] = this.tileSelected.textContent ?? "";
-      this.tileSelected.classList.remove("tile-wrong");
+      this.tileSelected.classList.remove("cell-wrong");
     }
     if (this.isComplete()) {
       this.stopTimer();
@@ -331,17 +326,6 @@ hr {
   flex-wrap: wrap;
 }
 
-.tile {
-  width: 48px;
-  height: 48px;
-  border: 1px solid lightgray;
-  font-size: 20px;
-  font-weight: bold;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
 .number {
   width: 44px;
   height: 44px;
@@ -358,19 +342,7 @@ hr {
   background-color: gray;
 }
 
-.tile-start {
-  background-color: whitesmoke;
-}
-
-.horizontal-line {
-  border-bottom: 1px solid black;
-}
-
-.vertical-line {
-  border-right: 1px solid black;
-}
-
-.tile-wrong {
+.cell-wrong {
   color: lightcoral;
 }
 </style>
